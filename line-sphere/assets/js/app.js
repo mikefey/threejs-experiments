@@ -37,11 +37,10 @@ function init() {
     });
     var lineGeometry = new THREE.Geometry();
 
-    var newPositionArray = positionArray.slice();
-    newPositionArray = shuffleArray(newPositionArray);
-    for (var ii = 0; ii < newPositionArray.length; ii++) {
-      lineGeometry.vertices.push(new THREE.Vector3(newPositionArray[ii][0], newPositionArray[ii][1], newPositionArray[ii][2]));
-      if (ii == newPositionArray.length - 1) {
+    for (var ii = 0; ii < positionArray.length; ii++) {
+      lineGeometry.vertices.push(new THREE.Vector3(positionArray[i][0], positionArray[i][1], positionArray[i][2]));
+      lineGeometry.vertices.push(new THREE.Vector3(positionArray[ii][0], positionArray[ii][1], positionArray[ii][2]));
+      if (ii == positionArray.length - 1) {
         lineGeometry.vertices.push(lineGeometry.vertices[0]);
       }
     }
