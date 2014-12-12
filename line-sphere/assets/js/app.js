@@ -25,7 +25,7 @@ function init() {
   var positionArray = arrangeInSphere(numPoints, 170);
 
   for (var i = 0; i < numPoints; i++) {
-    var sphere = new THREE.Mesh(new THREE.SphereGeometry(2, 5, 5), new THREE.MeshBasicMaterial({color: 0x00ff00}));
+    var sphere = new THREE.Mesh(new THREE.SphereGeometry(2, 5, 5), new THREE.MeshBasicMaterial({color: 0x871dec}));
     scene.add(sphere);
     sphere.position.set(positionArray[i][0], positionArray[i][1], positionArray[i][2]);
   }
@@ -55,8 +55,8 @@ function init() {
   }
 
   renderer = new THREE.WebGLRenderer();
-  renderer.setClearColor( 0x101010 );
-  container.appendChild( renderer.domElement );
+  renderer.setClearColor(0x222222);
+  container.appendChild(renderer.domElement);
 
   stats = new Stats();
   stats.domElement.style.position = 'absolute';
