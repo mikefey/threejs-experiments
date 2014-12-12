@@ -7,6 +7,7 @@ var showIteration = 0;
 var showTimer = 0;
 var lines = [];
 var timeBetweenLines = 4;
+var flash = false;
 
 document.addEventListener('DOMContentLoaded', function(event) { 
   init();
@@ -14,14 +15,14 @@ document.addEventListener('DOMContentLoaded', function(event) {
 });
 
 function init() {
-  var numPoints = 100;
+  var numPoints = 50;
   container = document.getElementById('app');
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
   camera.position.z = 500;
  
   scene = new THREE.Scene();
 
-  var positionArray = arrangeInSphere(numPoints, 200);
+  var positionArray = arrangeInSphere(numPoints, 170);
 
   for (var i = 0; i < numPoints; i++) {
     var sphere = new THREE.Mesh(new THREE.SphereGeometry(2, 5, 5), new THREE.MeshBasicMaterial({color: 0x00ff00}));
@@ -39,14 +40,16 @@ function init() {
     var newPositionArray = positionArray.slice();
     newPositionArray = shuffleArray(newPositionArray);
     for (var ii = 0; ii < newPositionArray.length; ii++) {
-      lineGeometry.vertices.push(new THREE.Vector3(newPositionArray[ii][0] + (getRandomArbitrary(-20, 20)), newPositionArray[ii][1] + (getRandomArbitrary(-20, 20)), newPositionArray[ii][2] + (getRandomArbitrary(-20, 20))));
+      lineGeometry.vertices.push(new THREE.Vector3(newPositionArray[ii][0], newPositionArray[ii][1], newPositionArray[ii][2]));
       if (ii == newPositionArray.length - 1) {
         lineGeometry.vertices.push(lineGeometry.vertices[0]);
       }
     }
 
     var line = new THREE.Line(lineGeometry, lineMaterial);
-    line.visible = false;
+    if (flash) {
+      line.visible = false;
+    }
     lines.push(line);
     scene.add(line);
   }
@@ -106,21 +109,23 @@ function onResize() {
 
 function animate() {
   requestAnimationFrame( animate );
-  showTimer++;
-  if (showTimer >= timeBetweenLines) {
-    var prev = lines[showIteration - 1];
-    if (showIteration == 0) {
-      prev = lines[lines.length - 1];
-    }
-    showTimer = 0;
-    showIteration++;
-    if (showIteration > lines.length - 1) {
-      showIteration = 0;
-    }
 
-    prev.visible = false;
-    lines[showIteration].visible = true;
+  if (flash) {
+    showTimer++;
+    if (showTimer >= timeBetweenLines) {
+      var prev = lines[showIteration - 1];
+      if (showIteration == 0) {
+        prev = lines[lines.length - 1];
+      }
+      showTimer = 0;
+      showIteration++;
+      if (showIteration > lines.length - 1) {
+        showIteration = 0;
+      }
 
+      prev.visible = false;
+      lines[showIteration].visible = true;
+    }
   }
   
   render();
@@ -141,14 +146,12 @@ function getRandomArbitrary(min, max) {
 }
 
 function checkRotation(){
+  var x = camera.position.x,
+    y = camera.position.y,
+    z = camera.position.z;
 
-    var x = camera.position.x,
-        y = camera.position.y,
-        z = camera.position.z;
-
-    camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
-    camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
+  camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
+  camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
     
-    camera.lookAt(scene.position);
-    
-} 
+  camera.lookAt(scene.position);  
+}
