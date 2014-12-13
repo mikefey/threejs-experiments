@@ -6,8 +6,8 @@ var rotSpeed = .005;
 var showIteration = 0;
 var showTimer = 0;
 var lines = [];
-var timeBetweenLines = 4;
-var flash = false;
+var timeBetweenLines = 10;
+var flash = true;
 
 document.addEventListener('DOMContentLoaded', function(event) { 
   init();
@@ -33,7 +33,8 @@ function init() {
   for (var i = 0; i < positionArray.length; i++) {
     var randColor = Math.floor(Math.random()*16777215);
     var lineMaterial = new THREE.LineBasicMaterial({
-      color: randColor
+      color: randColor,
+      transparent: true
     });
     var lineGeometry = new THREE.Geometry();
 
@@ -47,7 +48,7 @@ function init() {
 
     var line = new THREE.Line(lineGeometry, lineMaterial);
     if (flash) {
-      line.visible = false;
+      line.material.opacity = 0.1;
     }
     lines.push(line);
     scene.add(line);
@@ -122,8 +123,8 @@ function animate() {
         showIteration = 0;
       }
 
-      prev.visible = false;
-      lines[showIteration].visible = true;
+      prev.material.opacity = 0.1;
+      lines[showIteration].material.opacity = 1;
     }
   }
   
@@ -151,6 +152,7 @@ function checkRotation(){
 
   camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
   camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
-    
+  camera.position.y = y * Math.cos(rotSpeed) - z * Math.sin(rotSpeed);
+
   camera.lookAt(scene.position);  
 }
