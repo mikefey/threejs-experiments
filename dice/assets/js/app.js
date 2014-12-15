@@ -5,6 +5,11 @@ var camera, scene, renderer;
 var rotSpeed = .005;
 var dieOne;
 var dieTwo;
+var rollCompleteTimeout = 0;
+var rolling = false;
+var raycaster;
+var dieOneRoll;
+var dieTwoRoll;
 
 Physijs.scripts.worker = 'assets/js/lib/physijs_worker.js';
 Physijs.scripts.ammo = 'ammo.js';
@@ -57,16 +62,17 @@ function init() {
   scene.simulate();
 
   dieOne = createBox(1);
+  dieOne.name = 'dieOne';
   scene.add(dieOne);
+
   dieTwo = createBox(2);
+  dieTwo.name = 'dieTwo';
   scene.add(dieTwo);
 
   dieOne.visible = false;
-  dieOne.setLinearVelocity({z: -20, y: 0, x: 0 });
-  dieOne.setAngularVelocity({z: -3, y: -5, x: -3 });
   dieTwo.visible = false;
-  dieTwo.setLinearVelocity({z: -20, y: 0, x: 0 });
-  dieTwo.setAngularVelocity({z: -5, y: -4, x: -4 });
+
+  document.getElementById('roll-button').addEventListener('click', setupAndRoll);
 }
 
 function addLight() {
@@ -105,7 +111,7 @@ function createGround() {
 }
 
 function createBox(num) {
-  var boxGeometry = new THREE.BoxGeometry( 4, 4, 4 )
+  var boxGeometry = new THREE.BoxGeometry(4, 4, 4);
   var box;
   var material;
   var xPos = -5;
@@ -133,7 +139,7 @@ function createBox(num) {
     xPos = 5;
   }
         
-  box.position.set(xPos, 15, 20);
+  box.position.set(xPos, 15, 0);
         
   box.rotation.set(
     Math.random() * Math.PI,
@@ -151,40 +157,80 @@ function createBox(num) {
 function boxReady() {
   dieOne.visible = true;
   dieTwo.visible = true;
+  document.getElementById('button-wrapper').style.display = 'block';
+}
+
+function setupAndRoll() {
+  document.getElementById('roll-results').innerHTML = '';
+  clearTimeout(rollCompleteTimeout);
+  rolling = true;
+  rollCompleteTimeout = setTimeout(onRollComplete, 3000);
+
+  dieOne.position.set(-5, 15, 20);
+  dieOne.__dirtyPosition = true;
+  dieOne.setLinearVelocity({z: -20, y: 0, x: 0 });
+  dieOne.setAngularVelocity({z: -3, y: -5, x: -3 });
+  
+  dieTwo.position.set(5, 15, 20);
+  dieTwo.__dirtyPosition = true;
+  dieTwo.setLinearVelocity({z: -20, y: 0, x: 0 });
+  dieTwo.setAngularVelocity({z: -5, y: -4, x: -4 });
+}
+
+function onRollComplete() {
+  rolling = false;
+
+  var origin = new THREE.Vector3(0, 30, 0);
+  
+  var dieOneDirection = new THREE.Vector3().subVectors(dieOne.position, origin).normalize();
+  raycaster = new THREE.Raycaster(origin, dieOneDirection);
+  var dieOneIntersects = raycaster.intersectObject(dieOne, true);
+  dieOneRoll = dieOneIntersects[0].face.materialIndex;
+
+  var dieTwoDirection = new THREE.Vector3().subVectors(dieTwo.position, origin).normalize();
+  raycaster = new THREE.Raycaster(origin, dieTwoDirection);
+  var dieTwoIntersects = raycaster.intersectObject(dieTwo, true);
+  dieTwoRoll = dieTwoIntersects[0].face.materialIndex;
+  
+  getTotalRoll();
+}
+
+function getTotalRoll() {
+  var amount1 = getRollAmount(dieOneRoll);
+  var amount2 = getRollAmount(dieTwoRoll);
+
+  document.getElementById('roll-results').innerHTML = 'You rolled: ' + (amount1 + amount2);
+}
+
+function getRollAmount(index) {
+  var rollAmount;
+  
+  switch(index) {
+    case 0:
+      rollAmount = 1;
+      break;
+    case 1:
+      rollAmount = 6;
+      break;
+    case 2:
+      rollAmount = 2;
+      break;
+    case 3:
+      rollAmount = 5;
+      break;
+    case 4:
+      rollAmount = 3;
+      break;
+    case 5:
+      rollAmount = 4;
+      break;
+  }
+
+  return rollAmount;
 }
 
 function handleCollision( collided_with, linearVelocity, angularVelocity ) {
-  switch ( ++this.collisions ) {
-    case 1:
-      console.log('1');
-      //this.material.color.setHex(0xcc8855);
-      break;
-    
-    case 2:
-      console.log('2');
-      //this.material.color.setHex(0xbb9955);
-      break;
-    
-    case 3:
-      console.log('3');
-      //this.material.color.setHex(0xaaaa55);
-      break;
-    
-    case 4:
-      console.log('4');
-      //this.material.color.setHex(0x99bb55);
-      break;
-    
-    case 5:
-      console.log('5');
-      //this.material.color.setHex(0x88cc55);
-      break;
-    
-    case 6:
-      console.log('6');
-      //this.material.color.setHex(0x77dd55);
-      break;
-  }
+  
 }
 
 function onResize() {
