@@ -152,7 +152,7 @@ function checkRotation(){
 
   camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
   camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
-  camera.position.y = y * Math.cos(rotSpeed) - z * Math.sin(rotSpeed);
+  camera.position.y = y * Math.cos(rotSpeed / 2) - z * Math.sin(rotSpeed / 2);
 
   camera.lookAt(scene.position);  
 }
