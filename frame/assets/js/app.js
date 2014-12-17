@@ -12,7 +12,7 @@ var lastMouseX = null;
 var lastMouseY = null;
 var mouseSpeedX = 0;
 var mouseSpeedY = 0;
-var threeDMousePos = {};
+var threeDMousePos;
 var numberOfPictures = 10;
 
 document.addEventListener('DOMContentLoaded', function(event) { 
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 function init() {
   var numPoints = 50;
   container = document.getElementById('app');
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+  camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.x = 0;
   camera.position.y = 0;
   camera.position.z = 200;
@@ -61,7 +61,7 @@ function addAllPictures() {
   }
 
   for (var i = 0; i < objectArray.length; i++) {
-    objectArray[i].position.z = (i * -100);
+    objectArray[i].position.z = (i * -50);
   }
 }
 
@@ -98,6 +98,9 @@ function onMouseMove(e) {
 
   var dir = vector.sub( camera.position ).normalize();
   var distance = - camera.position.z / dir.z;
+  if (!threeDMousePos) {
+    threeDMousePos = {};
+  }
   threeDMousePos = camera.position.clone().add(dir.multiplyScalar(distance));
 }
 

@@ -161,24 +161,28 @@ function boxReady() {
 }
 
 function setupAndRoll() {
-  document.getElementById('roll-results').innerHTML = '';
-  clearTimeout(rollCompleteTimeout);
-  rolling = true;
-  rollCompleteTimeout = setTimeout(onRollComplete, 3000);
+  if (!rolling) {
+    document.getElementById('button-wrapper').style.display = 'none';
+    document.getElementById('roll-results').innerHTML = '';
+    clearTimeout(rollCompleteTimeout);
+    rolling = true;
+    rollCompleteTimeout = setTimeout(onRollComplete, 3000);
 
-  dieOne.position.set(-5, 15, 20);
-  dieOne.__dirtyPosition = true;
-  dieOne.setLinearVelocity({z: -20, y: 0, x: 0 });
-  dieOne.setAngularVelocity({z: -3, y: -5, x: -3 });
-  
-  dieTwo.position.set(5, 15, 20);
-  dieTwo.__dirtyPosition = true;
-  dieTwo.setLinearVelocity({z: -20, y: 0, x: 0 });
-  dieTwo.setAngularVelocity({z: -5, y: -4, x: -4 });
+    dieOne.position.set(-5, 15, 20);
+    dieOne.__dirtyPosition = true;
+    dieOne.setLinearVelocity({z: -20, y: 0, x: 0 });
+    dieOne.setAngularVelocity({z: -3, y: -5, x: -3 });
+    
+    dieTwo.position.set(5, 15, 20);
+    dieTwo.__dirtyPosition = true;
+    dieTwo.setLinearVelocity({z: -20, y: 0, x: 0 });
+    dieTwo.setAngularVelocity({z: -5, y: -4, x: -4 });
+  }
 }
 
 function onRollComplete() {
   rolling = false;
+  document.getElementById('button-wrapper').style.display = 'block';
 
   var origin = new THREE.Vector3(0, 30, 0);
   
