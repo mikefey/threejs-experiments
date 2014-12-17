@@ -3,7 +3,17 @@ var context;
 var container, stats;
 var camera, scene, renderer;
 var rotSpeed = .005;
-var frameScale = 0.3;
+var frameGeometry;
+var objectArray = [];
+var mouseSpeed = 0;
+var lastMousePosition = {};
+var timestamp = null;
+var lastMouseX = null;
+var lastMouseY = null;
+var mouseSpeedX = 0;
+var mouseSpeedY = 0;
+var threeDMousePos = {};
+var numberOfPictures = 10;
 
 document.addEventListener('DOMContentLoaded', function(event) { 
   init();
@@ -16,9 +26,9 @@ function init() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.x = 0;
   camera.position.y = 0;
-  camera.position.z = 500;
+  camera.position.z = 200;
   camera.rotation.order = 'YXZ';
-  camera.setLens(50, 32);
+  //camera.setLens(50, 32);
  
   scene = new THREE.Scene();
 
@@ -32,59 +42,113 @@ function init() {
   container.appendChild( stats.domElement );
 
   onResize();
-  window.addEventListener( 'resize', onResize, false );
+  window.addEventListener('resize', onResize, false);
 
-  addFrame();
-  addImage()
+  $('#app').bind('mousemove', onMouseMove);
+
+  var loader = new THREE.JSONLoader(); // init the loader util
+  loader.load('assets/js/models/frame-model.json', function (geometry) {
+    frameGeometry = geometry;
+    addAllPictures();
+  });
+
   addLights();
 }
 
-function addFrame() {
-  var loader = new THREE.JSONLoader(); // init the loader util
+function addAllPictures() {
+  for (var i = 0; i < numberOfPictures; i++) {
+    addPicture(0.3 - (i * 0.01));
+  }
 
-  // init loading
-  loader.load('assets/js/models/frame-model.json', function (geometry) {
-    var material = new THREE.MeshPhongMaterial({
-      map: THREE.ImageUtils.loadTexture('assets/images/textures/gold.jpg'),
-      specular: '#302a07',
-      color: '#4d450c',
-      emissive: '#6b5f10',
-      shininess: 100 
-    });
-    
-    var mesh = new THREE.Mesh(geometry, material);
-
-    mesh.rotation.z = 1.57079633;
-    mesh.scale.x = mesh.scale.y = mesh.scale.z = frameScale;
-
-    mesh.overdraw = true;
-    
-    scene.add(mesh);
-  });
+  for (var i = 0; i < objectArray.length; i++) {
+    objectArray[i].position.z = (i * -100);
+  }
 }
 
-function addImage() {
-  var geometry = new THREE.PlaneGeometry(321, 352, 32 );
-  //var material = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+function onMouseMove(e) {
+  if (timestamp === null) {
+    timestamp = Date.now();
+    lastMouseX = e.screenX;
+    lastMouseY = e.screenY;
+    return;
+  }
+
+  var now = Date.now();
+  var dt =  now - timestamp;
+  var dx = e.screenX - lastMouseX;
+  var dy = e.screenY - lastMouseY;
+  var speedX = Math.round(dx / dt * 100);
+  var speedY = Math.round(dy / dt * 100);
+
+  mouseSpeedX = speedX;
+  mouseSpeedY = speedY;
+
+  timestamp = now;
+  lastMouseX = e.screenX;
+  lastMouseY = e.screenY;
+
+  var vector = new THREE.Vector3();
+
+  vector.set(
+    ( event.clientX / window.innerWidth ) * 2 - 1,
+    - ( event.clientY / window.innerHeight ) * 2 + 1,
+    0.5 );
+
+  vector.unproject( camera );
+
+  var dir = vector.sub( camera.position ).normalize();
+  var distance = - camera.position.z / dir.z;
+  threeDMousePos = camera.position.clone().add(dir.multiplyScalar(distance));
+}
+
+function addPicture(scale) {
+  var group = new THREE.Object3D();
+  var frame = createFrame(scale);
+  var image = createImage(scale);
+  
+  group.add(frame);
+  group.add(image);
+  scene.add(group);
+
+  objectArray.push(group);
+}
+
+function createFrame(scale) {
   var material = new THREE.MeshPhongMaterial({
-      map: THREE.ImageUtils.loadTexture('assets/images/textures/painting.jpg'),
-      specular: '#302a07',
-      color: '#4d450c',
-      emissive: '#6b5f10',
-      shininess: 100 
-    });
+    map: THREE.ImageUtils.loadTexture('assets/images/textures/gold.jpg'),
+    specular: '#302a07',
+    color: '#4d450c',
+    emissive: '#6b5f10',
+    shininess: 100 
+  });
+  
+  var mesh = new THREE.Mesh(frameGeometry, material);
+  mesh.rotation.z = 1.57079633;
+  mesh.scale.x = mesh.scale.y = mesh.scale.z = scale;
+  mesh.overdraw = true;
+  
+  return mesh;
+}
+
+function createImage(scale) {
+  var geometry = new THREE.PlaneBufferGeometry(321, 352, 32);
+  var material = new THREE.MeshPhongMaterial({
+    map: THREE.ImageUtils.loadTexture('assets/images/textures/painting.jpg'),
+    specular: '#302a07',
+    color: '#4d450c',
+    emissive: '#6b5f10',
+    shininess: 100 
+  });
   var plane = new THREE.Mesh( geometry, material );
-  plane.position.z = -5;
-  plane.scale.x = plane.scale.y = plane.scale.z = frameScale;
-  scene.add( plane );
+  plane.scale.x = plane.scale.y = plane.scale.z = scale;
+  
+  return plane;
 }
 
 function addLights() {
-  // add subtle ambient lighting
   var ambientLight = new THREE.AmbientLight(0x000000);
   scene.add(ambientLight);
   
-  // directional lighting
   var directionalLight = new THREE.DirectionalLight(0xffffff);
   directionalLight.position.set(1, 1, 1).normalize();
   scene.add(directionalLight);
@@ -106,10 +170,43 @@ function animate() {
 function render() {
   var time = performance.now();
 
-  checkRotation();
+  moveObjects();
 
   renderer.render( scene, camera );
 
+}
+
+function moveObjects() {
+  var maxRotX = 0.4;
+  var maxRotY = .5;
+  var newRotY = mouseSpeedX / 300;
+  if (newRotY >= maxRotY) {
+    newRotY = maxRotY;
+  }
+
+  if (newRotY <= -maxRotY) {
+    newRotY = -maxRotY;
+  }
+
+  var newRotX = mouseSpeedY / 300;
+
+  if (newRotX >= maxRotX) {
+    newRotX = maxRotX;
+  }
+
+  if (newRotX <= -maxRotX) {
+    newRotX = -maxRotX;
+  }
+
+  for (var i = 0; i < objectArray.length; i++) {
+    objectArray[i].rotation.x = newRotX;
+    objectArray[i].rotation.y = newRotY;
+    if (threeDMousePos) {
+      objectArray[i].position.x = threeDMousePos.x;
+      objectArray[i].position.y = threeDMousePos.y;
+    }
+  }
+  
 }
 
 function checkRotation(){

@@ -5,6 +5,9 @@ body, html {
   height: 100%;
 }
 
-canvas {
+canvas,
+#app {
   position: absolute;
+  width: 100%;
+  height: 100%;
 }
