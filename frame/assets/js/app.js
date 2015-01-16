@@ -44,7 +44,11 @@ function init() {
   onResize();
   window.addEventListener('resize', onResize, false);
 
-  $('#app').bind('mousemove', onMouseMove);
+  if ('ontouchstart' in document.documentElement) {
+    $('#app').bind('mousemove', onMouseMove);
+  } else {
+    $('#app').bind('mousemove', onMouseMove);
+  }
 
   var loader = new THREE.JSONLoader(); // init the loader util
   loader.load('assets/js/models/frame-model.json', function (geometry) {

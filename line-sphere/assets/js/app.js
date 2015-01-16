@@ -8,6 +8,7 @@ var showTimer = 0;
 var lines = [];
 var timeBetweenLines = 10;
 var flash = true;
+var spheres = [];
 
 document.addEventListener('DOMContentLoaded', function(event) { 
   init();
@@ -25,8 +26,9 @@ function init() {
   var positionArray = arrangeInSphere(numPoints, 170);
 
   for (var i = 0; i < numPoints; i++) {
-    var sphere = new THREE.Mesh(new THREE.SphereGeometry(2, 5, 5), new THREE.MeshBasicMaterial({color: 0x871dec}));
+    var sphere = new THREE.Mesh(new THREE.CircleGeometry(2, 20), new THREE.MeshBasicMaterial({color: 0x871dec}));
     scene.add(sphere);
+    spheres.push(sphere);
     sphere.position.set(positionArray[i][0], positionArray[i][1], positionArray[i][2]);
   }
 
@@ -151,6 +153,10 @@ function checkRotation(){
   camera.position.x = x * Math.cos(rotSpeed) + z * Math.sin(rotSpeed);
   camera.position.z = z * Math.cos(rotSpeed) - x * Math.sin(rotSpeed);
   camera.position.y = y * Math.cos(rotSpeed / 2) - z * Math.sin(rotSpeed / 2);
+
+  for (var i = 0; i < spheres.length; i++) {
+    spheres[i].lookAt( camera.position );
+  }
 
   camera.lookAt(scene.position);  
 }
