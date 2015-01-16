@@ -133,8 +133,6 @@ function animate() {
 }
 
 function render() {
-  var time = performance.now();
-
   checkRotation();
 
   renderer.render( scene, camera );

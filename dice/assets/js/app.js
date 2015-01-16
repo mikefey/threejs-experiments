@@ -250,12 +250,7 @@ function animate() {
 }
 
 function render() {
-  var time = performance.now();
-
-  //checkRotation();
-
   renderer.render( scene, camera );
-
 }
 
 function getRandomArbitrary(min, max) {

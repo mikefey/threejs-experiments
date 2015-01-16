@@ -171,8 +171,6 @@ function animate() {
 }
 
 function render() {
-  var time = performance.now();
-
   moveObjects();
 
   renderer.render( scene, camera );
