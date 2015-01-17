@@ -45,7 +45,7 @@ function init() {
   window.addEventListener('resize', onResize, false);
 
   if ('ontouchstart' in document.documentElement) {
-    $('#app').bind('mousemove', onMouseMove);
+    $('#app').bind('touchmove', onMouseMove);
   } else {
     $('#app').bind('mousemove', onMouseMove);
   }
@@ -72,15 +72,31 @@ function addAllPictures() {
 function onMouseMove(e) {
   if (timestamp === null) {
     timestamp = Date.now();
-    lastMouseX = e.screenX;
-    lastMouseY = e.screenY;
+    
+    if (e.originalEvent.touches) {
+      lastMouseX = e.originalEvent.touches[0].screenX;
+      lastMouseY = e.originalEvent.touches[0].screenY;
+    } else {
+      lastMouseX = e.screenX;
+      lastMouseY = e.screenY;
+    }
+    
     return;
   }
 
   var now = Date.now();
   var dt =  now - timestamp;
-  var dx = e.screenX - lastMouseX;
-  var dy = e.screenY - lastMouseY;
+  var dx;
+  var dy;
+
+  if (e.originalEvent.touches) {
+    dx = e.originalEvent.touches[0].screenX - lastMouseX;
+    dy = e.originalEvent.touches[0].screenY - lastMouseY;
+  } else {
+    dx = e.screenX - lastMouseX;
+    dy = e.screenY - lastMouseY;
+  }
+  
   var speedX = Math.round(dx / dt * 100);
   var speedY = Math.round(dy / dt * 100);
 
@@ -88,15 +104,28 @@ function onMouseMove(e) {
   mouseSpeedY = speedY;
 
   timestamp = now;
-  lastMouseX = e.screenX;
-  lastMouseY = e.screenY;
+
+  if (e.originalEvent.touches) {
+    lastMouseX = e.originalEvent.touches[0].screenX;
+    lastMouseY = e.originalEvent.touches[0].screenY;
+  } else {
+    lastMouseX = e.screenX;
+    lastMouseY = e.screenY;
+  }
 
   var vector = new THREE.Vector3();
 
-  vector.set(
-    ( event.clientX / window.innerWidth ) * 2 - 1,
-    - ( event.clientY / window.innerHeight ) * 2 + 1,
-    0.5 );
+  if (e.originalEvent.touches) {
+    vector.set(
+      ( e.originalEvent.touches[0].clientX / window.innerWidth ) * 2 - 1,
+      - ( e.originalEvent.touches[0].clientY / window.innerHeight ) * 2 + 1,
+      0.5 );
+  } else {
+    vector.set(
+      ( e.clientX / window.innerWidth ) * 2 - 1,
+      - ( e.clientY / window.innerHeight ) * 2 + 1,
+      0.5 );
+  }  
 
   vector.unproject( camera );
 
@@ -105,7 +134,12 @@ function onMouseMove(e) {
   if (!threeDMousePos) {
     threeDMousePos = {};
   }
+
   threeDMousePos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+  if (e.originalEvent.touches) {
+    e.preventDefault();
+  } 
 }
 
 function addPicture(scale) {
