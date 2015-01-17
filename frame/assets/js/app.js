@@ -14,6 +14,7 @@ var mouseSpeedX = 0;
 var mouseSpeedY = 0;
 var threeDMousePos;
 var numberOfPictures = 10;
+var frameLoaded = false;
 
 document.addEventListener('DOMContentLoaded', function(event) { 
   init();
@@ -28,7 +29,6 @@ function init() {
   camera.position.y = 0;
   camera.position.z = 200;
   camera.rotation.order = 'YXZ';
-  //camera.setLens(50, 32);
  
   scene = new THREE.Scene();
 
@@ -48,10 +48,12 @@ function init() {
     $('#app').bind('touchmove', onMouseMove);
   } else {
     $('#app').bind('mousemove', onMouseMove);
+    $('#mobile-instructions-wrapper').remove();
   }
 
   var loader = new THREE.JSONLoader(); // init the loader util
   loader.load('assets/js/models/frame-model.json', function (geometry) {
+    frameLoaded = true;
     frameGeometry = geometry;
     addAllPictures();
   });
@@ -70,6 +72,11 @@ function addAllPictures() {
 }
 
 function onMouseMove(e) {
+
+  if ($('#mobile-instructions-wrapper').length > 0 && frameLoaded) {
+    $('#mobile-instructions-wrapper').remove();
+  }
+
   if (timestamp === null) {
     timestamp = Date.now();
     
