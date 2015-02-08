@@ -50,3 +50,12 @@ canvas {
   cursor: pointer;
   margin: 0 auto;
 }
+
+#loader {
+  position: absolute;
+  height: 40px;
+  width: 40px;
+  left:50%;
+  top:50%;
+  margin: -20px 0px 0px -20px;
+}

@@ -158,6 +158,9 @@ function boxReady() {
   dieOne.visible = true;
   dieTwo.visible = true;
   document.getElementById('button-wrapper').style.display = 'block';
+  if (document.getElementById('loader')) {
+    document.getElementById('loader').parentNode.removeChild(document.getElementById('loader'));
+  }
 }
 
 function setupAndRoll() {

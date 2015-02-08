@@ -56,6 +56,7 @@ function init() {
     frameLoaded = true;
     frameGeometry = geometry;
     addAllPictures();
+    $('#loader').remove();
   });
 
   addLights();
